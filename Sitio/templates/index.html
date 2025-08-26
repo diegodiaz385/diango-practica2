@@ -58,6 +58,55 @@
             font-size: 1rem;
         }
 
+        /* Tabs */
+        .tabs {
+            display: flex;
+            margin-bottom: 2rem;
+            border-radius: 10px;
+            overflow: hidden;
+            border: 2px solid #ecf0f1;
+        }
+
+        .tab {
+            flex: 1;
+            padding: 1rem;
+            text-align: center;
+            background: #f8f9fa;
+            border: none;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            font-weight: 600;
+            color: #7f8c8d;
+        }
+
+        .tab.active {
+            background: linear-gradient(45deg, #667eea, #764ba2);
+            color: white;
+        }
+
+        .tab:hover:not(.active) {
+            background: #e9ecef;
+        }
+
+        /* Formularios */
+        .form-container {
+            position: relative;
+        }
+
+        .form {
+            display: none;
+            animation: fadeIn 0.3s ease;
+        }
+
+        .form.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
         .form-group {
             margin-bottom: 1.5rem;
         }
@@ -220,6 +269,23 @@
             margin-top: 1rem;
         }
 
+        .switch-form {
+            text-align: center;
+            margin-top: 1rem;
+            color: #7f8c8d;
+        }
+
+        .switch-form a {
+            color: #667eea;
+            text-decoration: none;
+            font-weight: 600;
+            cursor: pointer;
+        }
+
+        .switch-form a:hover {
+            text-decoration: underline;
+        }
+
         @media (max-width: 768px) {
             .login-container {
                 padding: 2rem;
@@ -235,27 +301,63 @@
             <p>Sistema de Ingreso</p>
         </div>
 
+        <!-- Tabs -->
+        <div class="tabs">
+            <button class="tab active" onclick="switchTab('login')">Iniciar Sesión</button>
+            <button class="tab" onclick="switchTab('register')">Crear Cuenta</button>
+        </div>
+
         <div class="error-message" id="errorMessage"></div>
         <div class="success-message" id="successMessage"></div>
 
-        <form id="loginForm">
-            {% csrf_token %}
-            <div class="form-group">
-                <label for="email">Correo Electrónico</label>
-                <input type="email" id="email" name="email" required placeholder="tu@email.com">
-            </div>
-
-            <div class="form-group">
-                <label for="password">Contraseña</label>
-                <div class="password-container">
-                    <input type="password" id="password" name="password" required>
-                    <button type="button" class="password-toggle" onclick="togglePassword('password')">👁️</button>
+        <div class="form-container">
+            <!-- Formulario de Inicio de Sesión -->
+            <form id="loginForm" class="form active">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="loginEmail">Correo Electrónico</label>
+                    <input type="email" id="loginEmail" name="email" required placeholder="tu@email.com">
                 </div>
-                <div class="password-strength" id="passwordStrength"></div>
-            </div>
 
-            <button type="submit" class="submit-btn" id="submitBtn">Ingresar</button>
-        </form>
+                <div class="form-group">
+                    <label for="loginPassword">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="loginPassword" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('loginPassword')">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="loginBtn">Iniciar Sesión</button>
+            </form>
+
+            <!-- Formulario de Registro -->
+            <form id="registerForm" class="form">
+                {% csrf_token %}
+                <div class="form-group">
+                    <label for="registerEmail">Correo Electrónico</label>
+                    <input type="email" id="registerEmail" name="email" required placeholder="tu@email.com">
+                </div>
+
+                <div class="form-group">
+                    <label for="registerPassword">Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="registerPassword" name="password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('registerPassword')">👁️</button>
+                    </div>
+                    <div class="password-strength" id="passwordStrength"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="confirmPassword">Confirmar Contraseña</label>
+                    <div class="password-container">
+                        <input type="password" id="confirmPassword" name="confirm_password" required>
+                        <button type="button" class="password-toggle" onclick="togglePassword('confirmPassword')">👁️</button>
+                    </div>
+                </div>
+
+                <button type="submit" class="submit-btn" id="registerBtn">Crear Cuenta</button>
+            </form>
+        </div>
 
         <div class="loading" id="loading">
             <div class="spinner"></div>
@@ -274,12 +376,32 @@
         </button>
 
         <div class="info-text">
-            Al ingresar, tus credenciales se guardarán de forma segura y podrás acceder a todas las funcionalidades del sitio.
+            Al crear una cuenta o iniciar sesión, podrás acceder a todas las funcionalidades del sitio.
         </div>
     </div>
 
     <script>
         let currentEmail = '';
+        let currentTab = 'login';
+
+        function switchTab(tab) {
+            currentTab = tab;
+            
+            // Actualizar tabs
+            document.querySelectorAll('.tab').forEach(t => t.classList.remove('active'));
+            event.target.classList.add('active');
+            
+            // Actualizar formularios
+            document.querySelectorAll('.form').forEach(f => f.classList.remove('active'));
+            if (tab === 'login') {
+                document.getElementById('loginForm').classList.add('active');
+            } else {
+                document.getElementById('registerForm').classList.add('active');
+            }
+            
+            // Limpiar mensajes
+            hideMessages();
+        }
 
         function togglePassword(inputId) {
             const input = document.getElementById(inputId);
@@ -331,23 +453,32 @@
             }
         }
 
+        function hideMessages() {
+            document.getElementById('errorMessage').style.display = 'none';
+            document.getElementById('successMessage').style.display = 'none';
+        }
+
         function showLoading(show) {
             const loading = document.getElementById('loading');
-            const submitBtn = document.getElementById('submitBtn');
+            const loginBtn = document.getElementById('loginBtn');
+            const registerBtn = document.getElementById('registerBtn');
             const githubBtn = document.getElementById('githubBtn');
             
             if (show) {
                 loading.style.display = 'block';
-                submitBtn.disabled = true;
+                loginBtn.disabled = true;
+                registerBtn.disabled = true;
                 githubBtn.disabled = true;
             } else {
                 loading.style.display = 'none';
-                submitBtn.disabled = false;
+                loginBtn.disabled = false;
+                registerBtn.disabled = false;
                 githubBtn.disabled = false;
             }
         }
 
-        document.getElementById('password').addEventListener('input', function() {
+        // Validación de contraseña para registro
+        document.getElementById('registerPassword').addEventListener('input', function() {
             const strength = checkPasswordStrength(this.value);
             const strengthDiv = document.getElementById('passwordStrength');
             
@@ -359,11 +490,76 @@
             }
         });
 
+        // Formulario de Inicio de Sesión
         document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('loginEmail').value;
+            const password = document.getElementById('loginPassword').value;
+            
+            if (!email || !password) {
+                showMessage('Por favor, completa todos los campos', 'error');
+                return;
+            }
+            
+            currentEmail = email;
+            showLoading(true);
+            
+            const csrfToken = document.querySelector('#loginForm [name=csrfmiddlewaretoken]').value;
+            
+            // Verificar credenciales
+            fetch('/api/check-credentials/', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'X-CSRFToken': csrfToken
+                },
+                body: JSON.stringify({
+                    email: email,
+                    password: password
+                })
+            })
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error(`HTTP error! status: ${response.status}`);
+                }
+                return response.json();
+            })
+            .then(data => {
+                showLoading(false);
+                
+                if (data.success) {
+                    showMessage('Inicio de sesión exitoso', 'success');
+                    setTimeout(() => {
+                        window.location.href = '/pagina2/';
+                    }, 1500);
+                } else {
+                    showMessage(data.message, 'error');
+                }
+            })
+            .catch(error => {
+                showLoading(false);
+                showMessage('Error de conexión: ' + error.message, 'error');
+            });
+        });
+
+        // Formulario de Registro
+        document.getElementById('registerForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const email = document.getElementById('registerEmail').value;
+            const password = document.getElementById('registerPassword').value;
+            const confirmPassword = document.getElementById('confirmPassword').value;
+            
+            if (!email || !password || !confirmPassword) {
+                showMessage('Por favor, completa todos los campos', 'error');
+                return;
+            }
+            
+            if (password !== confirmPassword) {
+                showMessage('Las contraseñas no coinciden', 'error');
+                return;
+            }
             
             if (password.length < 6) {
                 showMessage('La contraseña debe tener al menos 6 caracteres', 'error');
@@ -373,13 +569,9 @@
             currentEmail = email;
             showLoading(true);
             
-            // Obtener el token CSRF del formulario
-            const csrfToken = document.querySelector('[name=csrfmiddlewaretoken]').value;
+            const csrfToken = document.querySelector('#registerForm [name=csrfmiddlewaretoken]').value;
             
-            console.log('Enviando datos:', { email, password: '***' });
-            console.log('CSRF Token:', csrfToken);
-            
-            // Enviar credenciales al servidor
+            // Crear nueva cuenta
             fetch('/api/save-credentials/', {
                 method: 'POST',
                 headers: {
@@ -392,7 +584,6 @@
                 })
             })
             .then(response => {
-                console.log('Response status:', response.status);
                 if (!response.ok) {
                     throw new Error(`HTTP error! status: ${response.status}`);
                 }
@@ -400,12 +591,11 @@
             })
             .then(data => {
                 showLoading(false);
-                console.log('Response data:', data);
                 
                 if (data.success) {
-                    showMessage(data.message, 'success');
+                    showMessage('Cuenta creada exitosamente', 'success');
                     setTimeout(() => {
-                        window.location.href = data.redirect_url;
+                        window.location.href = '/pagina2/';
                     }, 1500);
                 } else {
                     showMessage(data.message, 'error');
@@ -413,13 +603,14 @@
             })
             .catch(error => {
                 showLoading(false);
-                console.error('Error completo:', error);
                 showMessage('Error de conexión: ' + error.message, 'error');
             });
         });
 
         function connectGitHub() {
-            const email = document.getElementById('email').value;
+            const email = currentTab === 'login' ? 
+                document.getElementById('loginEmail').value : 
+                document.getElementById('registerEmail').value;
             
             if (!email) {
                 showMessage('Por favor, ingresa tu correo electrónico primero', 'error');
@@ -427,27 +618,12 @@
             }
             
             // Redirigir a GitHub OAuth
-            const clientId = 'TU_GITHUB_CLIENT_ID'; // Configurar en GitHub
+            const clientId = 'TU_GITHUB_CLIENT_ID';
             const redirectUri = encodeURIComponent(window.location.origin + '/github/callback/');
-            const state = encodeURIComponent(email); // Pasar el email como state
+            const state = encodeURIComponent(email);
             const githubUrl = `https://github.com/login/oauth/authorize?client_id=${clientId}&redirect_uri=${redirectUri}&scope=user&state=${state}`;
             
             window.location.href = githubUrl;
-        }
-
-        function getCookie(name) {
-            let cookieValue = null;
-            if (document.cookie && document.cookie !== '') {
-                const cookies = document.cookie.split(';');
-                for (let i = 0; i < cookies.length; i++) {
-                    const cookie = cookies[i].trim();
-                    if (cookie.substring(0, name.length + 1) === (name + '=')) {
-                        cookieValue = decodeURIComponent(cookie.substring(name.length + 1));
-                        break;
-                    }
-                }
-            }
-            return cookieValue;
         }
 
         // Animación de entrada

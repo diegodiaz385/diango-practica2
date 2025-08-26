@@ -6,6 +6,7 @@ urlpatterns = [
 	path('index/', views.index, name='index'),
 	path('pagina2/', views.pagina2, name='pagina2'),
 	path('api/save-credentials/', views.save_credentials, name='save_credentials'),
+	path('api/check-credentials/', views.check_credentials, name='check_credentials'),
 	path('github/callback/', views.github_callback, name='github_callback'),
 	path('api/users/', views.get_users, name='get_users'),
 ]

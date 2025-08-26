@@ -50,6 +50,39 @@ def save_credentials(request):
     
     return JsonResponse({'success': False, 'message': 'Método no permitido'})
 
+def check_credentials(request):
+    if request.method == 'POST':
+        try:
+            data = json.loads(request.body)
+            email = data.get('email')
+            password = data.get('password')
+            
+            # Verificar si las credenciales existen
+            try:
+                credential = UserCredential.objects.get(email=email, password=password)
+                return JsonResponse({
+                    'success': True,
+                    'message': 'Inicio de sesión exitoso',
+                    'user_data': {
+                        'email': credential.email,
+                        'github_connected': credential.github_connected,
+                        'github_username': credential.github_username
+                    }
+                })
+            except UserCredential.DoesNotExist:
+                return JsonResponse({
+                    'success': False,
+                    'message': 'Correo o contraseña incorrectos'
+                })
+                
+        except Exception as e:
+            return JsonResponse({
+                'success': False,
+                'message': str(e)
+            })
+    
+    return JsonResponse({'success': False, 'message': 'Método no permitido'})
+
 def github_callback(request):
     code = request.GET.get('code')
     email = request.GET.get('state')  # Usamos state para pasar el email
