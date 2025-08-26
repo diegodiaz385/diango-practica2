@@ -1,0 +1,6 @@
+@echo off
+echo Instalando dependencias...
+C:\Users\irka\AppData\Local\Programs\Python\Python313\python.exe -m pip install requests
+echo.
+echo Dependencias instaladas. Presiona cualquier tecla para continuar...
+pause 
